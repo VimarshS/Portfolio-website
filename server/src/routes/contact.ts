@@ -2,6 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { Message } from '../models/Message';
+import { sendContactNotification } from '../services/mailer';
 
 const router = Router();
 
@@ -40,8 +41,16 @@ router.post('/', contactLimiter, async (req, res) => {
     return res.json({ success: true, message: 'Message sent successfully.' });
   }
 
-  try {
+    try {
     await Message.create(data);
+
+    // The message is already saved. If the email fails, we only log it.
+    try {
+      await sendContactNotification(data);
+    } catch (mailError) {
+      console.error('Email notification failed:', mailError);
+    }
+
     return res.status(201).json({
       success: true,
       message: 'Thank you for reaching out! Your message was received.',
