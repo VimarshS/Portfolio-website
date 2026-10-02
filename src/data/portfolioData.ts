@@ -109,8 +109,8 @@ export const PROJECTS: Project[] = [
     ],
     architecture: "Built with Next.js App Router and server actions for secure API communications. The frontend streams prompts to server endpoints that orchestrate structured Gemini interactions. Candidate profiles, sessions, and evaluation records are stored in PostgreSQL managed through Supabase with Row Level Security (RLS).",
     learnings: "Engineered structured output prompting strategies to prevent non-deterministic formatting failures in LLM evaluations, and handled asynchronous audio/text input pacing for a natural interview rhythm.",
-    githubUrl: "https://github.com/VimarshS",
-    liveUrl: "" // Configurable if user has separate deployment URL
+    githubUrl: "https://github.com/VimarshS/intervu-ai.git",
+    liveUrl: "https://intervu-ai-weld.vercel.app" 
   },
   {
     id: "notesgen-ai",
@@ -139,7 +139,7 @@ export const PROJECTS: Project[] = [
     architecture: "Decoupled single-page React frontend consuming a Node.js/Express REST API backend. Long-form texts are parsed, tokenized, and processed through LLM endpoints with optimized system prompts, then cached and organized in MongoDB collections.",
     learnings: "Designed efficient text chunking mechanisms to process multi-page documents without exceeding model context windows, and built clean client-side formatting for parsed output.",
     liveUrl: "https://notes-gen-ai-puce.vercel.app/",
-    githubUrl: "https://github.com/VimarshS"
+    githubUrl: "https://github.com/VimarshS/NotesGenAI.git"
   },
   {
     id: "realtime-chat",
@@ -168,8 +168,8 @@ export const PROJECTS: Project[] = [
     ],
     architecture: "React client connected via WebSocket protocols to an Express.js backend server. The server broadcasts incoming messages to active room subscribers while asynchronously writing payload records to MongoDB. Media uploads stream directly to Cloudinary with secure asset URLs stored in database documents.",
     learnings: "Mastered connection state management and optimistic UI updates, ensuring message bubbles render instantly in the UI with graceful rollback if the socket connection encounters latency.",
-    githubUrl: "https://github.com/VimarshS",
-    liveUrl: ""
+    githubUrl: "https://github.com/VimarshS/chat-app.git",
+    liveUrl: "https://chat-app-pink-eta-53.vercel.app"
   }
 ];
 
