@@ -30,27 +30,35 @@ const CONTACT_API_ENDPOINT = import.meta.env.VITE_CONTACT_API_URL || "/api/conta
  * Backend-ready contact submission handler.
  * Plug your preferred email provider (Resend, Formspree, EmailJS, Node/Express endpoint) here.
  */
-async function submitContactForm(data: ContactFormData): Promise<{ success: boolean; message: string }> {
-  // TODO: Connect this function to your real backend or serverless route:
-  //
-  // try {
-  //   const res = await fetch(CONTACT_API_ENDPOINT, {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify(data)
-  //   });
-  //   if (!res.ok) throw new Error('Failed to submit message');
-  //   return { success: true, message: 'Message sent successfully.' };
-  // } catch (err) {
-  //   return { success: false, message: 'Server error. Please email directly.' };
-  // }
+async function submitContactForm(
+  data: ContactFormData & { website?: string }
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const res = await fetch(CONTACT_API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
 
-  // Simulated asynchronous network delay for polished UI demonstration
-  await new Promise((resolve) => setTimeout(resolve, 900));
-  return { 
-    success: true, 
-    message: "Thank you for reaching out! Your message was received and I will reply shortly." 
-  };
+    const result = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: result?.message || 'Something went wrong. Please try again.',
+      };
+    }
+
+    return {
+      success: true,
+      message: result?.message || 'Message sent successfully.',
+    };
+  } catch {
+    return {
+      success: false,
+      message: 'Cannot reach the server. Please email vimarshadarsh@gmail.com directly.',
+    };
+  }
 }
 
 export const Contact: React.FC = () => {
@@ -66,6 +74,7 @@ export const Contact: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
 
   const categories = [
     'Job Opportunity',
@@ -74,11 +83,15 @@ export const Contact: React.FC = () => {
     'General Inquiry'
   ];
 
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(PERSONAL_INFO.email);
+  const handleCopyEmail = async () => {
+  try {
+    await navigator.clipboard.writeText(PERSONAL_INFO.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
-  };
+  } catch {
+    window.location.href = `mailto:${PERSONAL_INFO.email}`;
+  }
+};
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof ContactFormData, string>> = {};
@@ -108,28 +121,28 @@ export const Contact: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  e.preventDefault();
+  if (!validate()) return;
 
-    setIsSubmitting(true);
-    try {
-      const res = await submitContactForm(formData);
-      if (res.success) {
-        setSubmitSuccess(true);
-        setFormData({
-          name: '',
-          email: '',
-          category: 'Job Opportunity',
-          subject: '',
-          message: ''
-        });
-      }
-    } catch {
-      setErrors({ message: 'Submission failed. Please email vimarshadarsh@gmail.com directly.' });
-    } finally {
-      setIsSubmitting(false);
+  setIsSubmitting(true);
+  try {
+    const res = await submitContactForm({ ...formData, website: honeypot });
+    if (res.success) {
+      setSubmitSuccess(true);
+      setFormData({
+        name: '',
+        email: '',
+        category: 'Job Opportunity',
+        subject: '',
+        message: ''
+      });
+    } else {
+      setErrors({ message: res.message });
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <section id="contact" className="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-neutral-900">
@@ -265,6 +278,19 @@ export const Contact: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                  <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', height: 0, overflow: 'hidden' }}>
+                    <label>
+                      Website
+                      <input
+                        type="text"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                      />
+                    </label>
+                  </div>
                 {/* Category Selector */}
                 <div>
                   <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-2">
