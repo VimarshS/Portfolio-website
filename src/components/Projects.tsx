@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { PROJECTS, Project } from '../data/portfolioData';
+import { Project } from '../data/portfolioData';
+import { useProjects } from '../hooks/useProjects';
 import { ProjectCard } from './ProjectCard';
 import { ProjectModal } from './ProjectModal';
 import { Layers, ArrowUpRight } from 'lucide-react';
 
 export const ProjectsSection: React.FC = () => {
+  const projects = useProjects();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
 
   const categories = ['All', 'Full-Stack & AI', 'AI & Web', 'Real-Time & WebSockets'];
 
   const filteredProjects = selectedCategory === 'All'
-    ? PROJECTS
-    : PROJECTS.filter(p => p.category === selectedCategory);
+    ? projects
+    : projects.filter(p => p.category === selectedCategory);
 
   return (
     <section id="projects" className="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-neutral-900">
@@ -51,25 +53,25 @@ export const ProjectsSection: React.FC = () => {
       </div>
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {filteredProjects.map((project, index) => (
-          <div 
-            key={project.id} 
+          <div
+            key={project.id}
             className={index === 0 && selectedCategory === 'All' ? 'lg:col-span-2' : ''}
           >
-            <ProjectCard 
-              project={project} 
-              onOpenModal={(p) => setActiveModalProject(p)} 
-              index={index} 
+            <ProjectCard
+              project={project}
+              onOpenModal={(p) => setActiveModalProject(p)}
+              index={index}
             />
           </div>
         ))}
       </div>
 
       {/* Case Study Modal */}
-      <ProjectModal 
-        project={activeModalProject} 
-        onClose={() => setActiveModalProject(null)} 
+      <ProjectModal
+        project={activeModalProject}
+        onClose={() => setActiveModalProject(null)}
       />
     </section>
   );
