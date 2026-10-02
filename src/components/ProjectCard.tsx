@@ -48,9 +48,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenModal, 
 
         {/* Interactive Mockup Container */}
         <div className="mb-6">
-          <ProjectMockup 
+                    <ProjectMockup 
             type={project.mockupType} 
             title={project.title} 
+            technologies={project.technologies}
             onOpenModal={() => onOpenModal(project)}
           />
         </div>

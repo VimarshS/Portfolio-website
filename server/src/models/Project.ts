@@ -17,7 +17,7 @@ const projectSchema = new Schema(
     mockupType: {
       type: String,
       required: true,
-      enum: ['interview', 'notes', 'chat'],
+      enum: ['interview', 'notes', 'chat', 'generic'],
     },
     technologies: { type: [String], default: [] },
     features: { type: [String], default: [] },

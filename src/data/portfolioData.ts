@@ -12,7 +12,7 @@ export interface Project {
   githubUrl?: string;
   tagline: string;
   category: 'Full-Stack & AI' | 'AI & Web' | 'Real-Time & WebSockets';
-  mockupType: 'interview' | 'notes' | 'chat';
+  mockupType: 'interview' | 'notes' | 'chat'| 'generic';
 }
 
 export interface SkillItem {

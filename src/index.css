@@ -70,3 +70,24 @@
     scroll-behavior: auto !important;
   }
 }
+/* Smooth reveal for projects shown by "View More" */
+@keyframes project-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.project-reveal {
+  animation: project-reveal 0.55s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-reveal {
+    animation: none;
+  }
+}
