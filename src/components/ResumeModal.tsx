@@ -42,6 +42,15 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
   if (!isOpen) return null;
 
   const handleDownload = () => {
+    // Count the download (best effort, it never blocks the real download)
+    const apiBase = import.meta.env.VITE_API_BASE_URL;
+    if (apiBase) {
+      fetch(`${apiBase}/api/resume/download`, {
+        method: 'POST',
+        keepalive: true,
+      }).catch(() => {});
+    }
+
     // Attempts to download /resume.pdf
     const link = document.createElement('a');
     link.href = PERSONAL_INFO.resumePath;
