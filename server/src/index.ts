@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db';
 import contactRoutes from './routes/contact';
+import projectRoutes from './routes/projects';
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ app.use(
 app.use(express.json());
 
 app.use('/api/contact', contactRoutes);
-
+app.use('/api/projects', projectRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Portfolio server is running' });
 });
