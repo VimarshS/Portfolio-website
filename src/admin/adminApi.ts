@@ -64,3 +64,69 @@ export async function verifyToken(): Promise<boolean> {
     return false;
   }
 }
+
+// ---------- Dashboard data ----------
+
+export interface AdminMessage {
+  _id: string;
+  name: string;
+  email: string;
+  category: string;
+  subject: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface AdminStats {
+  totalMessages: number;
+  unreadMessages: number;
+  resumeDownloads: number;
+}
+
+class SessionExpiredError extends Error {}
+
+export function isSessionExpired(error: unknown): boolean {
+  return error instanceof SessionExpiredError;
+}
+
+// Same as fetch, but adds the token and handles "not logged in" in one place
+async function authedFetch(path: string, options: RequestInit = {}) {
+  const token = getToken();
+  if (!token) throw new SessionExpiredError();
+
+  const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+  if (options.body) headers['Content-Type'] = 'application/json';
+
+  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+
+  if (res.status === 401) {
+    clearToken();
+    throw new SessionExpiredError();
+  }
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.message || 'Request failed.');
+  return data;
+}
+
+export async function fetchStats(): Promise<AdminStats> {
+  const data = await authedFetch('/api/admin/stats');
+  return data.stats;
+}
+
+export async function fetchMessages(): Promise<AdminMessage[]> {
+  const data = await authedFetch('/api/admin/messages');
+  return data.messages;
+}
+
+export async function setMessageRead(id: string, isRead: boolean): Promise<void> {
+  await authedFetch(`/api/admin/messages/${id}/read`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isRead }),
+  });
+}
+
+export async function deleteMessage(id: string): Promise<void> {
+  await authedFetch(`/api/admin/messages/${id}`, { method: 'DELETE' });
+}

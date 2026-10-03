@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminLogin, clearToken, verifyToken } from './adminApi';
+import { AdminDashboard } from './AdminDashboard';
 
 type Status = 'checking' | 'loggedOut' | 'loggedIn';
 
@@ -50,6 +51,11 @@ export const AdminPage: React.FC = () => {
     clearToken();
     setStatus('loggedOut');
   };
+
+  // Logged in: show the dashboard on its own full page
+  if (status === 'loggedIn') {
+    return <AdminDashboard onLogout={handleLogout} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#050506] text-neutral-200 tech-grid-pattern flex items-center justify-center px-4">
@@ -118,30 +124,6 @@ export const AdminPage: React.FC = () => {
             ← Back to portfolio
           </a>
         </form>
-      )}
-
-      {status === 'loggedIn' && (
-        <div className="w-full max-w-sm rounded-2xl border border-neutral-800 bg-[#08080a]/95 p-6 sm:p-8 space-y-5 shadow-2xl text-center">
-          <div className="text-xs font-mono text-emerald-400">Signed in</div>
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="text-sm text-neutral-400">
-            The dashboard comes in the next step.
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <a
-              href="/"
-              className="px-4 py-2 rounded-lg border border-neutral-800 text-sm text-neutral-300 hover:border-neutral-700 transition-colors"
-            >
-              Portfolio
-            </a>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 rounded-lg bg-neutral-800 text-sm text-white hover:bg-neutral-700 transition-colors"
-            >
-              Log out
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
