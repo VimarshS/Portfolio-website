@@ -55,8 +55,14 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Right: Copyright */}
-        <div className="text-xs font-mono text-neutral-400 text-center md:text-right">
-          © 2026 Vimarsh Srivastava. All rights reserved.
+        <div className="text-xs font-mono text-neutral-400 text-center md:text-right space-y-1">
+          <div>© 2026 Vimarsh Srivastava. All rights reserved.</div>
+          <a
+            href="/admin"
+            className="inline-block text-neutral-600 hover:text-neutral-300 transition-colors"
+          >
+            Admin
+          </a>
         </div>
       </div>
     </footer>
