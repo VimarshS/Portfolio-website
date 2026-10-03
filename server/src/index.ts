@@ -6,6 +6,7 @@ import { connectDB } from './config/db';
 import contactRoutes from './routes/contact';
 import projectRoutes from './routes/projects';
 import resumeRoutes from './routes/resume';
+import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use('/api/contact', contactRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/resume', resumeRoutes);
+app.use('/api/admin', adminRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Portfolio server is running' });
 });
