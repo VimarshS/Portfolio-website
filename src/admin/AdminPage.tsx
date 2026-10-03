@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { adminLogin, clearToken, verifyToken } from './adminApi';
 import { AdminDashboard } from './AdminDashboard';
+import { CustomCursor } from '../components/CustomCursor';
 
 type Status = 'checking' | 'loggedOut' | 'loggedIn';
 
@@ -53,12 +54,18 @@ export const AdminPage: React.FC = () => {
   };
 
   // Logged in: show the dashboard on its own full page
-  if (status === 'loggedIn') {
-    return <AdminDashboard onLogout={handleLogout} />;
+    if (status === 'loggedIn') {
+    return (
+      <>
+        <CustomCursor />
+        <AdminDashboard onLogout={handleLogout} />
+      </>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#050506] text-neutral-200 tech-grid-pattern flex items-center justify-center px-4">
+      <CustomCursor />
       {status === 'checking' && (
         <p className="text-sm font-mono text-neutral-500">Checking session...</p>
       )}
