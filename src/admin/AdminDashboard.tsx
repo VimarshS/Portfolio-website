@@ -237,7 +237,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <div className="px-4 pb-4 pl-9 space-y-4">
                       <div className="text-xs text-indigo-400 select-text">{m.email}</div>
 
-                      <p className="text-sm text-neutral-300 whitespace-pre-wrap break-words leading-relaxed">
+                      <p className="text-sm text-neutral-300 whitespace-pre-wrap wrap-break-word leading-relaxed">
                         {m.message}
                       </p>
 
