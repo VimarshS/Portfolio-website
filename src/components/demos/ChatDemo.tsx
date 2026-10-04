@@ -1,12 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, CheckCheck, Clock, MessageCircle, Search, Send } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCheck,
+  Clock,
+  MessageCircle,
+  Search,
+  Send,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
 
-type Status = 'sending' | 'delivered';
+type Status = 'sending' | 'delivered' | 'failed';
 
 interface Contact {
   id: string;
   name: string;
-  online: boolean;
+  online: boolean; // starting presence
   tone: string; // avatar colours
 }
 
@@ -39,14 +49,23 @@ const SEED: Record<string, ChatMessage[]> = {
   kabir: [],
 };
 
+// Canned answers, used one after another
+const REPLIES: Record<string, string[]> = {
+  aarav: ['Got it, merging the PR now.', 'Sounds good! I will test it on my side.', 'Ship it.'],
+  priya: ['Perfect, see you there.', 'Let me check and get back to you.', 'Thanks for the update!'],
+  sneha: ['Hey! Just saw this.', 'Give me a minute.', 'Sounds good to me.'],
+  kabir: ['On it.', 'Can we sync after lunch?', 'Looks great to me.'],
+};
+
 const nowTime = () =>
   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
-const Avatar: React.FC<{ contact: Contact; size?: 'sm' | 'md'; showPresence?: boolean }> = ({
-  contact,
-  size = 'md',
-  showPresence = true,
-}) => {
+const Avatar: React.FC<{
+  contact: Contact;
+  online: boolean;
+  size?: 'sm' | 'md';
+  showPresence?: boolean;
+}> = ({ contact, online, size = 'md', showPresence = true }) => {
   const initials = contact.name
     .split(' ')
     .map((part) => part[0])
@@ -64,14 +83,17 @@ const Avatar: React.FC<{ contact: Contact; size?: 'sm' | 'md'; showPresence?: bo
       </div>
       {showPresence && (
         <span
-          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0b0b10] ${
-            contact.online ? 'bg-emerald-400' : 'bg-neutral-600'
+          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0b0b10] transition-colors ${
+            online ? 'bg-emerald-400' : 'bg-neutral-600'
           }`}
         />
       )}
     </div>
   );
 };
+
+const initialPresence = (): Record<string, boolean> =>
+  Object.fromEntries(CONTACTS.map((c) => [c.id, c.online]));
 
 const ChatDemo: React.FC = () => {
   const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>(SEED);
@@ -80,22 +102,50 @@ const ChatDemo: React.FC = () => {
   const [draft, setDraft] = useState('');
   // On narrow cards only one pane fits: the chat list or the open chat
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('chat');
+  const [unread, setUnread] = useState<Record<string, number>>({ priya: 1 });
+  const [typingId, setTypingId] = useState<string | null>(null);
+  const [networkOn, setNetworkOn] = useState(true);
+  const [presence, setPresence] = useState<Record<string, boolean>>(initialPresence);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
   const nextId = useRef(100);
+  const replyCount = useRef<Record<string, number>>({});
+  const replyPending = useRef<Set<string>>(new Set());
+
+  // Timers run later, so they read the newest values from refs
+  const networkRef = useRef(true);
+  const presenceRef = useRef<Record<string, boolean>>(initialPresence());
+  const viewingRef = useRef<string | null>('aarav');
 
   const active = CONTACTS.find((c) => c.id === activeId) ?? CONTACTS[0];
+  const activeOnline = presence[active.id];
   const messages = conversations[activeId] ?? [];
   const visibleContacts = CONTACTS.filter((c) =>
     c.name.toLowerCase().includes(query.trim().toLowerCase())
   );
+  const firstName = active.name.split(' ')[0];
+
+  // Which chat is on screen right now (used to decide if a reply is "unread")
+  useEffect(() => {
+    viewingRef.current = mobileView === 'chat' ? activeId : null;
+  }, [activeId, mobileView]);
 
   // Scroll only the message box, never the whole page
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length, activeId, mobileView]);
+  }, [messages.length, activeId, mobileView, typingId]);
+
+  // Presence changes by itself every few seconds, like users coming and going
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      const next = { ...presenceRef.current, sneha: !presenceRef.current.sneha };
+      presenceRef.current = next;
+      setPresence(next);
+    }, 9000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   // Stop pending timers when the demo is closed or reset
   useEffect(() => {
@@ -104,9 +154,69 @@ const ChatDemo: React.FC = () => {
     };
   }, []);
 
+  const later = (ms: number, fn: () => void) => {
+    const timer = window.setTimeout(fn, ms);
+    timers.current.push(timer);
+  };
+
   const openChat = (id: string) => {
     setActiveId(id);
     setMobileView('chat');
+    setUnread((prev) => ({ ...prev, [id]: 0 }));
+  };
+
+  const toggleNetwork = () => {
+    const next = !networkOn;
+    networkRef.current = next;
+    setNetworkOn(next);
+  };
+
+  const setStatus = (contactId: string, id: number, status: Status) => {
+    setConversations((prev) => ({
+      ...prev,
+      [contactId]: (prev[contactId] ?? []).map((m) => (m.id === id ? { ...m, status } : m)),
+    }));
+  };
+
+  const addIncoming = (contactId: string, text: string) => {
+    const message: ChatMessage = { id: nextId.current++, mine: false, text, time: nowTime() };
+    setConversations((prev) => ({
+      ...prev,
+      [contactId]: [...(prev[contactId] ?? []), message],
+    }));
+    if (viewingRef.current !== contactId) {
+      setUnread((prev) => ({ ...prev, [contactId]: (prev[contactId] ?? 0) + 1 }));
+    }
+  };
+
+  // An online person starts typing, then answers
+  const scheduleReply = (contactId: string) => {
+    const pool = REPLIES[contactId];
+    if (!pool || !presenceRef.current[contactId]) return;
+    if (replyPending.current.has(contactId)) return;
+    replyPending.current.add(contactId);
+
+    later(600, () => setTypingId(contactId));
+    later(2300, () => {
+      const count = replyCount.current[contactId] ?? 0;
+      replyCount.current[contactId] = count + 1;
+      setTypingId((current) => (current === contactId ? null : current));
+      addIncoming(contactId, pool[count % pool.length]);
+      replyPending.current.delete(contactId);
+    });
+  };
+
+  // The "server" answers: delivered if the network works, failed if it does not
+  const deliver = (contactId: string, id: number) => {
+    const delay = networkRef.current ? 700 : 1500;
+    later(delay, () => {
+      if (networkRef.current) {
+        setStatus(contactId, id, 'delivered');
+        scheduleReply(contactId);
+      } else {
+        setStatus(contactId, id, 'failed');
+      }
+    });
   };
 
   const handleSend = (e: React.FormEvent) => {
@@ -115,27 +225,23 @@ const ChatDemo: React.FC = () => {
     if (!text) return;
 
     const id = nextId.current++;
-    const targetId = activeId;
     const message: ChatMessage = { id, mine: true, text, time: nowTime(), status: 'sending' };
 
     // Optimistic UI: the bubble appears at once, before the "server" answers
     setConversations((prev) => ({
       ...prev,
-      [targetId]: [...(prev[targetId] ?? []), message],
+      [activeId]: [...(prev[activeId] ?? []), message],
     }));
     setDraft('');
-
-    // The "server" confirms a moment later
-    const timer = window.setTimeout(() => {
-      setConversations((prev) => ({
-        ...prev,
-        [targetId]: (prev[targetId] ?? []).map((m) =>
-          m.id === id ? { ...m, status: 'delivered' } : m
-        ),
-      }));
-    }, 700);
-    timers.current.push(timer);
+    deliver(activeId, id);
   };
+
+  const handleRetry = (id: number) => {
+    setStatus(activeId, id, 'sending');
+    deliver(activeId, id);
+  };
+
+  const lastIsMine = messages.length > 0 && messages[messages.length - 1].mine;
 
   return (
     <div className="@container">
@@ -167,31 +273,47 @@ const ChatDemo: React.FC = () => {
           </div>
 
           <ul className="flex-1 overflow-y-auto px-1.5 pb-2 space-y-0.5">
-            {visibleContacts.map((c) => (
-              <li key={c.id}>
-                <button
-                  type="button"
-                  onClick={() => openChat(c.id)}
-                  className={`w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors ${
-                    c.id === activeId ? 'bg-white/10' : 'hover:bg-white/5'
-                  }`}
-                >
-                  <Avatar contact={c} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs font-medium text-neutral-100">
-                      {c.name}
+            {visibleContacts.map((c) => {
+              const online = presence[c.id];
+              const count = unread[c.id] ?? 0;
+              return (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => openChat(c.id)}
+                    className={`w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors ${
+                      c.id === activeId ? 'bg-white/10' : 'hover:bg-white/5'
+                    }`}
+                  >
+                    <Avatar contact={c} online={online} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-xs font-medium text-neutral-100">
+                        {c.name}
+                      </span>
+                      <span
+                        className={`block text-[11px] ${
+                          typingId === c.id
+                            ? 'text-violet-300'
+                            : online
+                            ? 'text-emerald-400'
+                            : 'text-neutral-500'
+                        }`}
+                      >
+                        {typingId === c.id ? 'typing...' : online ? 'Online' : 'Offline'}
+                      </span>
                     </span>
-                    <span
-                      className={`block text-[11px] ${
-                        c.online ? 'text-emerald-400' : 'text-neutral-500'
-                      }`}
-                    >
-                      {c.online ? 'Online' : 'Offline'}
-                    </span>
-                  </span>
-                </button>
-              </li>
-            ))}
+                    {count > 0 && (
+                      <span
+                        className="min-w-[18px] h-[18px] px-1 rounded-full bg-violet-500 text-white text-[10px] font-semibold flex items-center justify-center"
+                        aria-label={`${count} unread`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
             {visibleContacts.length === 0 && (
               <li className="px-3 py-6 text-center text-xs text-neutral-500">No users found</li>
             )}
@@ -213,16 +335,44 @@ const ChatDemo: React.FC = () => {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <Avatar contact={active} />
+            <Avatar contact={active} online={activeOnline} />
             <div className="min-w-0">
               <div className="truncate text-xs font-semibold text-white">{active.name}</div>
               <div
-                className={`text-[11px] ${active.online ? 'text-emerald-400' : 'text-neutral-500'}`}
+                className={`text-[11px] ${
+                  typingId === active.id
+                    ? 'text-violet-300'
+                    : activeOnline
+                    ? 'text-emerald-400'
+                    : 'text-neutral-500'
+                }`}
               >
-                {active.online ? 'Online' : 'Offline'}
+                {typingId === active.id ? 'typing...' : activeOnline ? 'Online' : 'Offline'}
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={toggleNetwork}
+              aria-pressed={!networkOn}
+              title="Simulate a network failure"
+              className={`ml-auto shrink-0 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                networkOn
+                  ? 'border-neutral-700 text-neutral-300 hover:border-neutral-600'
+                  : 'border-amber-500/50 bg-amber-500/10 text-amber-300'
+              }`}
+            >
+              {networkOn ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+              <span className="hidden @md:inline">{networkOn ? 'Network on' : 'Network off'}</span>
+            </button>
           </header>
+
+          {!networkOn && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border-b border-amber-500/20 text-[11px] text-amber-300">
+              <WifiOff className="w-3 h-3 shrink-0" />
+              <span>Connection lost. New messages will fail until you switch it back on.</span>
+            </div>
+          )}
 
           <div
             ref={scrollRef}
@@ -232,18 +382,22 @@ const ChatDemo: React.FC = () => {
           >
             {messages.length === 0 && (
               <p className="pt-10 text-center text-xs text-neutral-500">
-                No messages yet. Say hi to {active.name.split(' ')[0]}!
+                No messages yet. Say hi to {firstName}!
               </p>
             )}
 
             {messages.map((m) => (
               <div key={m.id} className={`flex items-end gap-2 ${m.mine ? 'flex-row-reverse' : ''}`}>
-                {!m.mine && <Avatar contact={active} size="sm" showPresence={false} />}
+                {!m.mine && (
+                  <Avatar contact={active} online={activeOnline} size="sm" showPresence={false} />
+                )}
                 <div className={`max-w-[75%] flex flex-col ${m.mine ? 'items-end' : 'items-start'}`}>
                   <div
                     className={`px-3 py-2 rounded-2xl text-xs leading-relaxed wrap-break-word ${
                       m.mine
-                        ? 'rounded-br-sm bg-gradient-to-br from-purple-500 to-violet-600 text-white'
+                        ? m.status === 'failed'
+                          ? 'rounded-br-sm bg-rose-500/15 border border-rose-500/40 text-rose-100'
+                          : 'rounded-br-sm bg-gradient-to-br from-purple-500 to-violet-600 text-white'
                         : 'rounded-bl-sm bg-white/10 border border-white/10 text-neutral-100'
                     }`}
                   >
@@ -260,10 +414,47 @@ const ChatDemo: React.FC = () => {
                     {m.mine && m.status === 'delivered' && (
                       <CheckCheck className="w-3 h-3 text-violet-400" aria-label="Delivered" />
                     )}
+                    {m.mine && m.status === 'failed' && (
+                      <>
+                        <AlertCircle className="w-3 h-3 text-rose-400" />
+                        <span className="text-rose-300">Not sent</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRetry(m.id)}
+                          className="text-violet-300 underline underline-offset-2 hover:text-violet-200"
+                        >
+                          Retry
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
+
+            {typingId === active.id && (
+              <div className="flex items-end gap-2">
+                <Avatar contact={active} online={activeOnline} size="sm" showPresence={false} />
+                <div
+                  className="px-3 py-2.5 rounded-2xl rounded-bl-sm bg-white/10 border border-white/10 flex items-center gap-1"
+                  aria-label={`${firstName} is typing`}
+                >
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full bg-neutral-400 motion-safe:animate-bounce"
+                      style={{ animationDelay: `${i * 150}ms` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!activeOnline && lastIsMine && (
+              <p className="text-center text-[11px] text-neutral-500">
+                {firstName} is offline. They will see your message when they are back.
+              </p>
+            )}
           </div>
 
           <form
