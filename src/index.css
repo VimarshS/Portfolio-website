@@ -95,3 +95,25 @@
     animation: none;
   }
 }
+
+/* Profile panel in the chat demo */
+@keyframes demo-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.demo-slide-in {
+  animation: demo-slide-in 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-slide-in {
+    animation: none;
+  }
+}

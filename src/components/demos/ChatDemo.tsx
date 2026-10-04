@@ -4,20 +4,24 @@ import {
   ArrowLeft,
   CheckCheck,
   Clock,
+  ImagePlus,
+  Info,
   MessageCircle,
   Search,
   Send,
   Wifi,
   WifiOff,
+  X,
 } from 'lucide-react';
 
-type Status = 'sending' | 'delivered' | 'failed';
+type Status = 'uploading' | 'sending' | 'delivered' | 'failed';
 
 interface Contact {
   id: string;
   name: string;
   online: boolean; // starting presence
   tone: string; // avatar colours
+  bio: string;
 }
 
 interface ChatMessage {
@@ -26,15 +30,17 @@ interface ChatMessage {
   text: string;
   time: string;
   status?: Status;
+  image?: string; // local preview address of an attached picture
+  progress?: number; // upload progress, 0 to 100
 }
 
 // All people in this demo are made up
 const CONTACTS: Contact[] = [
-  { id: 'aarav', name: 'Aarav Mehta', online: true, tone: 'bg-violet-500/25 text-violet-200' },
-  { id: 'priya', name: 'Priya Nair', online: true, tone: 'bg-fuchsia-500/25 text-fuchsia-200' },
-  { id: 'rohan', name: 'Rohan Gupta', online: false, tone: 'bg-sky-500/25 text-sky-200' },
-  { id: 'sneha', name: 'Sneha Rao', online: false, tone: 'bg-emerald-500/25 text-emerald-200' },
-  { id: 'kabir', name: 'Kabir Sethi', online: true, tone: 'bg-amber-500/25 text-amber-200' },
+  { id: 'aarav', name: 'Aarav Mehta', online: true, tone: 'bg-violet-500/25 text-violet-200', bio: 'Building APIs, breaking nothing.' },
+  { id: 'priya', name: 'Priya Nair', online: true, tone: 'bg-fuchsia-500/25 text-fuchsia-200', bio: 'Frontend and design systems.' },
+  { id: 'rohan', name: 'Rohan Gupta', online: false, tone: 'bg-sky-500/25 text-sky-200', bio: 'Away for the weekend.' },
+  { id: 'sneha', name: 'Sneha Rao', online: false, tone: 'bg-emerald-500/25 text-emerald-200', bio: 'Mobile apps and late-night builds.' },
+  { id: 'kabir', name: 'Kabir Sethi', online: true, tone: 'bg-amber-500/25 text-amber-200', bio: 'Always up for a code review.' },
 ];
 
 const SEED: Record<string, ChatMessage[]> = {
@@ -57,13 +63,15 @@ const REPLIES: Record<string, string[]> = {
   kabir: ['On it.', 'Can we sync after lunch?', 'Looks great to me.'],
 };
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
 const nowTime = () =>
   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
 const Avatar: React.FC<{
   contact: Contact;
   online: boolean;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   showPresence?: boolean;
 }> = ({ contact, online, size = 'md', showPresence = true }) => {
   const initials = contact.name
@@ -76,7 +84,7 @@ const Avatar: React.FC<{
     <div className="relative shrink-0">
       <div
         className={`${
-          size === 'sm' ? 'w-7 h-7 text-[10px]' : 'w-9 h-9 text-xs'
+          size === 'sm' ? 'w-7 h-7 text-[10px]' : size === 'lg' ? 'w-16 h-16 text-lg' : 'w-9 h-9 text-xs'
         } rounded-full flex items-center justify-center font-semibold ${contact.tone}`}
       >
         {initials}
@@ -106,9 +114,14 @@ const ChatDemo: React.FC = () => {
   const [typingId, setTypingId] = useState<string | null>(null);
   const [networkOn, setNetworkOn] = useState(true);
   const [presence, setPresence] = useState<Record<string, boolean>>(initialPresence);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [attachError, setAttachError] = useState('');
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const timers = useRef<number[]>([]);
+  const intervals = useRef<number[]>([]);
+  const objectUrls = useRef<string[]>([]);
   const nextId = useRef(100);
   const replyCount = useRef<Record<string, number>>({});
   const replyPending = useRef<Set<string>>(new Set());
@@ -125,6 +138,7 @@ const ChatDemo: React.FC = () => {
     c.name.toLowerCase().includes(query.trim().toLowerCase())
   );
   const firstName = active.name.split(' ')[0];
+  const media = messages.filter((m) => m.image && m.status === 'delivered');
 
   // Which chat is on screen right now (used to decide if a reply is "unread")
   useEffect(() => {
@@ -147,10 +161,12 @@ const ChatDemo: React.FC = () => {
     return () => window.clearInterval(interval);
   }, []);
 
-  // Stop pending timers when the demo is closed or reset
+  // Stop pending timers and free picture memory when the demo is closed or reset
   useEffect(() => {
     return () => {
       timers.current.forEach((t) => window.clearTimeout(t));
+      intervals.current.forEach((i) => window.clearInterval(i));
+      objectUrls.current.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);
 
@@ -171,10 +187,10 @@ const ChatDemo: React.FC = () => {
     setNetworkOn(next);
   };
 
-  const setStatus = (contactId: string, id: number, status: Status) => {
+  const updateMessage = (contactId: string, id: number, patch: Partial<ChatMessage>) => {
     setConversations((prev) => ({
       ...prev,
-      [contactId]: (prev[contactId] ?? []).map((m) => (m.id === id ? { ...m, status } : m)),
+      [contactId]: (prev[contactId] ?? []).map((m) => (m.id === id ? { ...m, ...patch } : m)),
     }));
   };
 
@@ -211,10 +227,10 @@ const ChatDemo: React.FC = () => {
     const delay = networkRef.current ? 700 : 1500;
     later(delay, () => {
       if (networkRef.current) {
-        setStatus(contactId, id, 'delivered');
+        updateMessage(contactId, id, { status: 'delivered' });
         scheduleReply(contactId);
       } else {
-        setStatus(contactId, id, 'failed');
+        updateMessage(contactId, id, { status: 'failed' });
       }
     });
   };
@@ -236,9 +252,72 @@ const ChatDemo: React.FC = () => {
     deliver(activeId, id);
   };
 
+  // Fake upload: the bar fills up, then the picture is "delivered" like a message
+  const startUpload = (contactId: string, id: number) => {
+    updateMessage(contactId, id, { status: 'uploading', progress: 0 });
+
+    let progress = 0;
+    const interval = window.setInterval(() => {
+      progress = Math.min(100, progress + 14);
+      updateMessage(contactId, id, { progress });
+      if (progress >= 100) {
+        window.clearInterval(interval);
+        updateMessage(contactId, id, { status: 'sending' });
+        deliver(contactId, id);
+      }
+    }, 130);
+    intervals.current.push(interval);
+  };
+
+  const showAttachError = (text: string) => {
+    setAttachError(text);
+    later(3000, () => setAttachError(''));
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // lets the same picture be chosen again
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showAttachError('Please choose an image file.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      showAttachError('That image is too large. The limit is 5 MB.');
+      return;
+    }
+
+    // The picture stays in your browser. Nothing is uploaded anywhere.
+    const url = URL.createObjectURL(file);
+    objectUrls.current.push(url);
+
+    const id = nextId.current++;
+    const message: ChatMessage = {
+      id,
+      mine: true,
+      text: '',
+      image: url,
+      time: nowTime(),
+      status: 'uploading',
+      progress: 0,
+    };
+
+    setConversations((prev) => ({
+      ...prev,
+      [activeId]: [...(prev[activeId] ?? []), message],
+    }));
+    startUpload(activeId, id);
+  };
+
   const handleRetry = (id: number) => {
-    setStatus(activeId, id, 'sending');
-    deliver(activeId, id);
+    const failed = messages.find((m) => m.id === id);
+    if (failed?.image) {
+      startUpload(activeId, id);
+    } else {
+      updateMessage(activeId, id, { status: 'sending' });
+      deliver(activeId, id);
+    }
   };
 
   const lastIsMine = messages.length > 0 && messages[messages.length - 1].mine;
@@ -324,7 +403,7 @@ const ChatDemo: React.FC = () => {
         <section
           className={`${
             mobileView === 'chat' ? 'flex' : 'hidden'
-          } @lg:flex min-w-0 flex-1 flex-col`}
+          } @lg:flex relative min-w-0 flex-1 flex-col`}
         >
           <header className="flex items-center gap-2.5 px-3 py-2.5 border-b border-neutral-800/80">
             <button
@@ -351,20 +430,33 @@ const ChatDemo: React.FC = () => {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={toggleNetwork}
-              aria-pressed={!networkOn}
-              title="Simulate a network failure"
-              className={`ml-auto shrink-0 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                networkOn
-                  ? 'border-neutral-700 text-neutral-300 hover:border-neutral-600'
-                  : 'border-amber-500/50 bg-amber-500/10 text-amber-300'
-              }`}
-            >
-              {networkOn ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-              <span className="hidden @md:inline">{networkOn ? 'Network on' : 'Network off'}</span>
-            </button>
+            <div className="ml-auto flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleNetwork}
+                aria-pressed={!networkOn}
+                title="Simulate a network failure"
+                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                  networkOn
+                    ? 'border-neutral-700 text-neutral-300 hover:border-neutral-600'
+                    : 'border-amber-500/50 bg-amber-500/10 text-amber-300'
+                }`}
+              >
+                {networkOn ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                <span className="hidden @md:inline">{networkOn ? 'Network on' : 'Network off'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInfoOpen((open) => !open)}
+                aria-pressed={infoOpen}
+                aria-label="Contact info"
+                title="Contact info"
+                className="shrink-0 p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <Info className="w-4 h-4" />
+              </button>
+            </div>
           </header>
 
           {!networkOn && (
@@ -393,7 +485,9 @@ const ChatDemo: React.FC = () => {
                 )}
                 <div className={`max-w-[75%] flex flex-col ${m.mine ? 'items-end' : 'items-start'}`}>
                   <div
-                    className={`px-3 py-2 rounded-2xl text-xs leading-relaxed wrap-break-word ${
+                    className={`${
+                      m.image ? 'p-1' : 'px-3 py-2'
+                    } rounded-2xl text-xs leading-relaxed wrap-break-word ${
                       m.mine
                         ? m.status === 'failed'
                           ? 'rounded-br-sm bg-rose-500/15 border border-rose-500/40 text-rose-100'
@@ -401,10 +495,34 @@ const ChatDemo: React.FC = () => {
                         : 'rounded-bl-sm bg-white/10 border border-white/10 text-neutral-100'
                     }`}
                   >
-                    {m.text}
+                    {m.image ? (
+                      <div className="relative overflow-hidden rounded-xl">
+                        <img
+                          src={m.image}
+                          alt="Shared in chat"
+                          className="block max-h-36 max-w-full object-cover"
+                        />
+                        {m.status === 'uploading' && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/55 px-4">
+                            <span className="text-[11px] font-semibold text-white">
+                              {m.progress ?? 0}%
+                            </span>
+                            <div className="h-1 w-full max-w-[120px] overflow-hidden rounded-full bg-white/20">
+                              <div
+                                className="h-full rounded-full bg-violet-400 transition-all duration-150"
+                                style={{ width: `${m.progress ?? 0}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      m.text
+                    )}
                   </div>
                   <div className="mt-1 flex items-center gap-1 text-[10px] text-neutral-500">
                     <span>{m.time}</span>
+                    {m.mine && m.status === 'uploading' && <span>Uploading...</span>}
                     {m.mine && m.status === 'sending' && (
                       <>
                         <Clock className="w-3 h-3" />
@@ -457,10 +575,33 @@ const ChatDemo: React.FC = () => {
             )}
           </div>
 
+          {attachError && (
+            <p role="alert" className="px-3 pb-1 text-[11px] text-rose-300">
+              {attachError}
+            </p>
+          )}
+
           <form
             onSubmit={handleSend}
             className="flex items-center gap-2 px-3 py-2.5 border-t border-neutral-800/80"
           >
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFile}
+              className="hidden"
+              aria-label="Choose an image"
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              aria-label="Attach an image"
+              title="Attach an image (it stays in your browser)"
+              className="w-8 h-8 shrink-0 rounded-full border border-white/10 bg-white/5 text-neutral-300 flex items-center justify-center hover:text-white hover:border-violet-400/60 transition-colors"
+            >
+              <ImagePlus className="w-3.5 h-3.5" />
+            </button>
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -478,6 +619,58 @@ const ChatDemo: React.FC = () => {
               <Send className="w-3.5 h-3.5" />
             </button>
           </form>
+
+          {/* Profile panel, opened with the info button */}
+          {infoOpen && (
+            <aside
+              className="demo-slide-in absolute inset-y-0 right-0 z-10 flex w-[75%] @md:w-[55%] flex-col border-l border-neutral-800 bg-[#0f0d1c] shadow-2xl"
+              aria-label={`${active.name} profile`}
+            >
+              <div className="flex justify-end p-2">
+                <button
+                  type="button"
+                  onClick={() => setInfoOpen(false)}
+                  aria-label="Close profile"
+                  className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex flex-col items-center px-4 pb-4 text-center">
+                <Avatar contact={active} online={activeOnline} size="lg" />
+                <div className="mt-2 text-sm font-semibold text-white">{active.name}</div>
+                <div className="mt-0.5 text-[11px] text-neutral-400">{active.bio}</div>
+                <div
+                  className={`mt-1 text-[11px] ${
+                    activeOnline ? 'text-emerald-400' : 'text-neutral-500'
+                  }`}
+                >
+                  {activeOnline ? 'Online' : 'Offline'}
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto border-t border-neutral-800/80 px-4 py-3">
+                <div className="mb-2 text-xs font-medium text-neutral-200">Media</div>
+                {media.length === 0 ? (
+                  <p className="text-[11px] leading-relaxed text-neutral-500">
+                    No media yet. Attach an image in this chat and it will appear here.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {media.map((m) => (
+                      <img
+                        key={m.id}
+                        src={m.image}
+                        alt="Shared media"
+                        className="aspect-square w-full rounded-md object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </aside>
+          )}
         </section>
       </div>
     </div>
