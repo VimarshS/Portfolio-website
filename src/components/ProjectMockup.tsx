@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import {
   Terminal,
   Send,
@@ -16,6 +16,11 @@ import {
   Check,
 } from 'lucide-react';
 import { DemoFrame } from './demos/DemoFrame';
+
+import { LazyMount, DemoSkeleton } from './demos/LazyMount';
+
+// Loaded only when the card comes near the screen
+const ChatDemo = lazy(() => import('./demos/ChatDemo'));
 
 interface ProjectMockupProps {
   type: 'interview' | 'notes' | 'chat' | 'generic';
@@ -45,46 +50,46 @@ export const ProjectMockup: React.FC<ProjectMockupProps> = ({
   );
 
   // Chat State
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'Alex',
-      text: 'Has the WebSocket connection re-established?',
-      time: '10:42 AM',
-      isSelf: false,
-    },
-    {
-      id: 2,
-      sender: 'Vimarsh (You)',
-      text: 'Yes! Full-duplex Socket connection active with MongoDB persistence.',
-      time: '10:43 AM',
-      isSelf: true,
-    },
-    {
-      id: 3,
-      sender: 'Alex',
-      text: 'Awesome, image attachments via Cloudinary are loading instantly.',
-      time: '10:44 AM',
-      isSelf: false,
-    },
-  ]);
-  const [inputMsg, setInputMsg] = useState('');
+  // const [messages, setMessages] = useState([
+  //   {
+  //     id: 1,
+  //     sender: 'Alex',
+  //     text: 'Has the WebSocket connection re-established?',
+  //     time: '10:42 AM',
+  //     isSelf: false,
+  //   },
+  //   {
+  //     id: 2,
+  //     sender: 'Vimarsh (You)',
+  //     text: 'Yes! Full-duplex Socket connection active with MongoDB persistence.',
+  //     time: '10:43 AM',
+  //     isSelf: true,
+  //   },
+  //   {
+  //     id: 3,
+  //     sender: 'Alex',
+  //     text: 'Awesome, image attachments via Cloudinary are loading instantly.',
+  //     time: '10:44 AM',
+  //     isSelf: false,
+  //   },
+  // ]);
+  // const [inputMsg, setInputMsg] = useState('');
 
-  const handleSendChat = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMsg.trim()) return;
+  // const handleSendChat = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!inputMsg.trim()) return;
 
-    const newMsg = {
-      id: Date.now(),
-      sender: 'Vimarsh (You)',
-      text: inputMsg,
-      time: 'Just now',
-      isSelf: true,
-    };
+  //   const newMsg = {
+  //     id: Date.now(),
+  //     sender: 'Vimarsh (You)',
+  //     text: inputMsg,
+  //     time: 'Just now',
+  //     isSelf: true,
+  //   };
 
-    setMessages((prev) => [...prev, newMsg]);
-    setInputMsg('');
-  };
+  //   setMessages((prev) => [...prev, newMsg]);
+  //   setInputMsg('');
+  // };
 
   const handleCopyCode = () => {
     setCopied(true);
@@ -97,11 +102,11 @@ export const ProjectMockup: React.FC<ProjectMockupProps> = ({
       : type === 'notes'
       ? 'notes-gen-ai-puce.vercel.app'
       : type === 'chat'
-      ? 'realtime-chat.vimarsh.dev'
+      ? 'vibe-chat (demo)'
       : 'project-overview';
 
   return (
-    <DemoFrame urlLabel={urlLabel} onOpenModal={onOpenModal}>
+    <DemoFrame urlLabel={urlLabel} onOpenModal={onOpenModal} interactive={type === 'chat'}>
       {type === 'interview' && (
         <div className="space-y-4">
           {/* Header / Role Selector */}
@@ -344,77 +349,13 @@ export const ProjectMockup: React.FC<ProjectMockupProps> = ({
         </div>
       )}
 
-      {type === 'chat' && (
-        <div className="space-y-3">
-          {/* Chat Header */}
-          <div className="flex items-center justify-between border-b border-neutral-800/80 pb-2.5">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-emerald-500/10 text-emerald-400">
-                <MessageSquare className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-neutral-200">
-                  Engineering Discussion Room
-                </div>
-                <div className="text-[11px] text-neutral-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  WebSockets Connected · 3 Online
-                </div>
-              </div>
-            </div>
-            <div className="text-[10px] font-mono text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
-              JWT Auth Verified
-            </div>
-          </div>
-
-          {/* Message Stream */}
-          <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={`flex flex-col text-xs ${
-                  m.isSelf ? 'items-end' : 'items-start'
-                }`}
-              >
-                <div className="text-[10px] text-neutral-400 mb-0.5 px-1">
-                  {m.sender} · {m.time}
-                </div>
-                <div
-                  className={`max-w-[85%] rounded-lg px-3 py-1.5 text-xs ${
-                    m.isSelf
-                      ? 'bg-indigo-600/90 text-white rounded-br-none shadow-sm'
-                      : 'bg-neutral-800/90 text-neutral-200 rounded-bl-none border border-neutral-700/60'
-                  }`}
-                >
-                  {m.text}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Interactive Message Input Box */}
-          <form
-            onSubmit={handleSendChat}
-            className="flex items-center gap-2 pt-1 border-t border-neutral-800"
-          >
-            <input
-              type="text"
-              value={inputMsg}
-              onChange={(e) => setInputMsg(e.target.value)}
-              placeholder="Test sending a message via WebSocket..."
-              className="flex-1 bg-neutral-900 border border-neutral-800 text-neutral-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-neutral-600"
-            />
-            <button
-              type="submit"
-              disabled={!inputMsg.trim()}
-              className="p-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 transition-colors"
-              title="Send via WebSocket"
-            >
-              <Send className="w-3.5 h-3.5" />
-            </button>
-          </form>
-        </div>
-      )}
+              {type === 'chat' && (
+          <LazyMount>
+            <Suspense fallback={<DemoSkeleton />}>
+              <ChatDemo />
+            </Suspense>
+          </LazyMount>
+        )}
 
       {type === 'generic' && (
         <div className="space-y-5">
