@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 // Grey pulsing placeholder shown before a demo loads
 export const DemoSkeleton: React.FC = () => (
-  <div className="min-h-[260px] rounded-lg bg-neutral-900/40 animate-pulse" aria-hidden="true" />
+  <div className="min-h-65 rounded-lg bg-neutral-900/40 animate-pulse" aria-hidden="true" />
 );
 
 interface LazyMountProps {

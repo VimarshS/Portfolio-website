@@ -22,6 +22,8 @@ import { LazyMount, DemoSkeleton } from './demos/LazyMount';
 // Loaded only when the card comes near the screen
 const ChatDemo = lazy(() => import('./demos/ChatDemo'));
 
+const NotesDemo = lazy(() => import('./demos/NotesDemo'));
+
 interface ProjectMockupProps {
   type: 'interview' | 'notes' | 'chat' | 'generic';
   title: string;
@@ -100,13 +102,13 @@ export const ProjectMockup: React.FC<ProjectMockupProps> = ({
     type === 'interview'
       ? 'ai-mock-interview.vimarsh.dev'
       : type === 'notes'
-      ? 'notes-gen-ai-puce.vercel.app'
+      ? 'notesgen-ai (demo)'
       : type === 'chat'
       ? 'vibe-chat (demo)'
       : 'project-overview';
 
   return (
-    <DemoFrame urlLabel={urlLabel} onOpenModal={onOpenModal} interactive={type === 'chat'}>
+    <DemoFrame urlLabel={urlLabel} onOpenModal={onOpenModal} interactive={type === 'chat' || type === 'notes'}>
       {type === 'interview' && (
         <div className="space-y-4">
           {/* Header / Role Selector */}
@@ -232,122 +234,13 @@ export const ProjectMockup: React.FC<ProjectMockupProps> = ({
         </div>
       )}
 
-      {type === 'notes' && (
-        <div className="space-y-4">
-          {/* View Tab Buttons */}
-          <div className="flex items-center justify-between border-b border-neutral-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-amber-500/10 text-amber-400">
-                <FileText className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs font-semibold text-neutral-200">
-                  NotesGen AI Synthesizer
-                </div>
-                <div className="text-[11px] text-neutral-400">
-                  Node / Express · OpenAI Ingestion
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 bg-neutral-900/80 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
-              <button
-                onClick={() => setActiveTab('summary')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${
-                  activeTab === 'summary'
-                    ? 'bg-neutral-800 text-white font-medium'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                Summary
-              </button>
-              <button
-                onClick={() => setActiveTab('keypoints')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${
-                  activeTab === 'keypoints'
-                    ? 'bg-neutral-800 text-white font-medium'
-                    : 'text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                Key Concepts
-              </button>
-            </div>
-          </div>
-
-          {/* Content Preview Box */}
-          <div className="p-3.5 rounded-lg bg-neutral-900/90 border border-neutral-800/90 font-mono text-[11px] leading-relaxed text-neutral-300">
-            {activeTab === 'summary' ? (
-              <div className="space-y-2">
-                <div className="text-amber-400 font-sans font-medium flex items-center justify-between text-xs">
-                  <span>
-                    Synthesized Notes: Operating Systems - Virtual Memory
-                  </span>
-                  <button
-                    onClick={handleCopyCode}
-                    className="text-neutral-400 hover:text-neutral-200 flex items-center gap-1"
-                  >
-                    {copied ? (
-                      <Check className="w-3 h-3 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-3 h-3" />
-                    )}
-                    <span className="font-mono text-[10px]">
-                      {copied ? 'Copied' : 'Copy'}
-                    </span>
-                  </button>
-                </div>
-                <p className="text-neutral-300 font-sans text-xs">
-                  Virtual memory abstracts physical RAM through demand paging,
-                  translating virtual addresses into physical frames via Page
-                  Tables and the Translation Lookaside Buffer (TLB).
-                </p>
-                <div className="text-[11px] text-neutral-400 font-sans pt-1 border-t border-neutral-800">
-                  • Page faults trigger OS trap handlers to swap victim pages to disk.
-                  <br />
-                  • Replacement policies (LRU, Clock algorithm) prevent thrashing
-                  under memory pressure.
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2 font-sans">
-                <div className="text-amber-400 font-medium text-xs">
-                  Extracted Semantic Key Concepts:
-                </div>
-                <ul className="space-y-1.5 text-xs text-neutral-300">
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-amber-400 font-mono font-bold">•</span>
-                    <span>
-                      <strong>Paging:</strong> Fixed-size memory allocation
-                      preventing external fragmentation.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-amber-400 font-mono font-bold">•</span>
-                    <span>
-                      <strong>TLB Hit Ratio:</strong> High-speed hardware cache
-                      minimizing memory access latency.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-amber-400 font-mono font-bold">•</span>
-                    <span>
-                      <strong>Working Set Model:</strong> Principle of locality
-                      keeping hot pages resident in RAM.
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Raw Ingestion Stats */}
-          <div className="flex items-center justify-between text-[11px] text-neutral-400 bg-neutral-950 p-2.5 rounded-lg border border-neutral-800/60 font-mono">
-            <span>Source: 1,840 Words</span>
-            <span className="text-emerald-400">Compressed: 78% Reduction</span>
-            <span>MongoDB Saved</span>
-          </div>
-        </div>
-      )}
+              {type === 'notes' && (
+          <LazyMount>
+            <Suspense fallback={<DemoSkeleton />}>
+              <NotesDemo />
+            </Suspense>
+          </LazyMount>
+        )}
 
               {type === 'chat' && (
           <LazyMount>

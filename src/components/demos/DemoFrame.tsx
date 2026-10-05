@@ -51,7 +51,7 @@ export const DemoFrame: React.FC<DemoFrameProps> = ({
 
       {/* Canvas. Real demos must allow text selection and typing, so no select-none */}
       <div
-        className={`p-4 sm:p-5 min-h-[300px] flex flex-col justify-between bg-gradient-to-b from-[#0a0a0c] via-[#09090b] to-[#070709] ${
+        className={`p-4 sm:p-5 min-h-75 flex flex-col justify-between bg-linear-to-b from-[#0a0a0c] via-[#09090b] to-[#070709] ${
           interactive ? '' : 'select-none'
         }`}
       >

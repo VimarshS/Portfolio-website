@@ -324,15 +324,15 @@ const ChatDemo: React.FC = () => {
 
   return (
     <div className="@container">
-      <div className="flex h-[340px] rounded-xl overflow-hidden border border-neutral-800 bg-[#0b0b10]">
+      <div className="flex h-85 rounded-xl overflow-hidden border border-neutral-800 bg-[#0b0b10]">
         {/* Sidebar: brand, search, people */}
         <aside
           className={`${
             mobileView === 'list' ? 'flex' : 'hidden'
-          } @lg:flex w-full @lg:w-[40%] shrink-0 flex-col border-r border-neutral-800/80 bg-gradient-to-b from-[#14112a] to-[#0b0b10]`}
+          } @lg:flex w-full @lg:w-[40%] shrink-0 flex-col border-r border-neutral-800/80 bg-linear-to-b from-[#14112a] to-[#0b0b10]`}
         >
           <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-400 to-violet-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-md bg-linear-to-br from-purple-400 to-violet-600 flex items-center justify-center">
               <MessageCircle className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-bold text-white tracking-tight">Vibe</span>
@@ -383,7 +383,7 @@ const ChatDemo: React.FC = () => {
                     </span>
                     {count > 0 && (
                       <span
-                        className="min-w-[18px] h-[18px] px-1 rounded-full bg-violet-500 text-white text-[10px] font-semibold flex items-center justify-center"
+                        className="min-w-4.5 h-4.5 px-1 rounded-full bg-violet-500 text-white text-[10px] font-semibold flex items-center justify-center"
                         aria-label={`${count} unread`}
                       >
                         {count}
@@ -491,7 +491,7 @@ const ChatDemo: React.FC = () => {
                       m.mine
                         ? m.status === 'failed'
                           ? 'rounded-br-sm bg-rose-500/15 border border-rose-500/40 text-rose-100'
-                          : 'rounded-br-sm bg-gradient-to-br from-purple-500 to-violet-600 text-white'
+                          : 'rounded-br-sm bg-linear-to-br from-purple-500 to-violet-600 text-white'
                         : 'rounded-bl-sm bg-white/10 border border-white/10 text-neutral-100'
                     }`}
                   >
@@ -507,7 +507,7 @@ const ChatDemo: React.FC = () => {
                             <span className="text-[11px] font-semibold text-white">
                               {m.progress ?? 0}%
                             </span>
-                            <div className="h-1 w-full max-w-[120px] overflow-hidden rounded-full bg-white/20">
+                            <div className="h-1 w-full max-w-30 overflow-hidden rounded-full bg-white/20">
                               <div
                                 className="h-full rounded-full bg-violet-400 transition-all duration-150"
                                 style={{ width: `${m.progress ?? 0}%` }}
@@ -614,7 +614,7 @@ const ChatDemo: React.FC = () => {
               type="submit"
               disabled={!draft.trim()}
               aria-label="Send message"
-              className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-purple-400 to-violet-600 text-white flex items-center justify-center hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="w-8 h-8 shrink-0 rounded-full bg-linear-to-br from-purple-400 to-violet-600 text-white flex items-center justify-center hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               <Send className="w-3.5 h-3.5" />
             </button>
