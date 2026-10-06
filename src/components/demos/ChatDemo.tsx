@@ -161,6 +161,16 @@ const ChatDemo: React.FC = () => {
     return () => window.clearInterval(interval);
   }, []);
 
+    // Escape closes the profile panel
+  useEffect(() => {
+    if (!infoOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setInfoOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [infoOpen]);
+
   // Stop pending timers and free picture memory when the demo is closed or reset
   useEffect(() => {
     return () => {

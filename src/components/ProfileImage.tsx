@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Terminal, Code2 } from 'lucide-react';
+import { Terminal } from 'lucide-react';
 
 interface ProfileImageProps {
   src?: string;
@@ -73,13 +73,15 @@ export const ProfileImage: React.FC<ProfileImageProps> = ({
               <img
                 src={src}
                 alt={alt}
+                width={540}
+                height={960}
                 onError={() => setImageError(true)}
                 onLoad={() => setImageLoaded(true)}
-                className={`w-full h-full object-cover object-center transition-all duration-500 ${
-                  imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-                } group-hover:scale-105`}
+                className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer"
                 loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
 
               {/* Gradient scrim for depth */}

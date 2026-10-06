@@ -117,3 +117,12 @@
     animation: none;
   }
 }
+
+/* Clear focus ring for keyboard users. It is inside @layer base, so inputs that
+   set their own focus style still win. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
+  }
+}
