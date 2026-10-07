@@ -154,7 +154,7 @@ export const Contact: React.FC = () => {
               Let's build something.
             </h2>
             <p className="text-sm sm:text-base text-neutral-400 mt-3 leading-relaxed">
-              I am actively seeking software engineering internships, entry-level developer roles, and technical collaborations. Whether you have an open position or want to discuss architecture, feel free to send a message.
+              Looking for internships, entry-level software roles and technical collaborations. Have an opening or an idea? Send me a message.
             </p>
           </div>
 

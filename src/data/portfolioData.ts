@@ -63,7 +63,7 @@ export const PERSONAL_INFO = {
   name: "Vimarsh Srivastava",
   role: "Software Engineer",
   tagline: "Software Engineer | Full Stack Developer | AI Enthusiast",
-  bio: "Building robust, production-ready full-stack applications, distributed RESTful architectures, and intelligent web experiences. Focused on modern JavaScript/TypeScript, React, Node.js, Next.js, relational and document databases, and AI engineering.",
+  bio: "I build full-stack web apps with React, Next.js, Node.js and TypeScript, using PostgreSQL, MongoDB and AI APIs.",
   location: "Lucknow, India",
   email: "vimarshadarsh@gmail.com",
   phone: "+91 9118694244",
@@ -75,7 +75,7 @@ export const PERSONAL_INFO = {
   stats: [
     { label: "SIH Hackathon", value: "3rd Place", context: "36-hr prototype" },
     { label: "LeetCode DSA", value: "250+", context: "Problems solved" },
-    { label: "Full-Stack Apps", value: "3+", context: "Production-ready MERN" },
+    { label: "Full-Stack Apps", value: "3+", context: "MERN stack" },
     { label: "RESTful APIs", value: "5+", context: "Built & integrated" },
   ]
 };
@@ -238,12 +238,12 @@ export const EXPERIENCE_ITEMS: ExperienceItem[] = [
     period: "Aug 2025 – Nov 2025",
     location: "Remote",
     type: "Internship",
-    summary: "Participated in an intensive hands-on full-stack development internship focusing on production MERN engineering, scalable RESTful API design, and disciplined software development practices.",
+    summary: "Hands-on full-stack internship covering the MERN stack, REST API design and good coding practice.",
     bulletPoints: [
       "Engineered 3 full-stack web applications from concept to deployment using the MERN stack (MongoDB, Express.js, React.js, Node.js).",
       "Developed and integrated 5+ RESTful APIs with strict request validation, structured error handling, and clean JSON payloads.",
       "Implemented stateless JWT authentication and role-based authorization to secure private application routes and sensitive data.",
-      "Maintained professional Git/GitHub version control workflows, disciplined code organization, debugging, and deployment configurations."
+      "Used Git and GitHub for version control, and handled code organization, debugging and deployment settings."
     ],
     skills: ["MongoDB", "Express.js", "React.js", "Node.js", "JWT", "REST APIs", "Git", "GitHub"]
   }
@@ -256,7 +256,7 @@ export const ACHIEVEMENTS: AchievementItem[] = [
     metric: "3rd Place",
     metricLabel: "Out of 20+ Teams",
     subtitle: "36-Hour Continuous Sprint",
-    description: "Collaborated under intense high-pressure constraints to deliver a complete, functioning software prototype within 36 hours. Evaluated by industry judges and secured 3rd position among 20+ competing university teams.",
+    description: "Built a working prototype with my team in 36 hours, evaluated by industry judges.",
     year: "2024",
     badge: "Hackathon Finalist"
   },
@@ -266,7 +266,7 @@ export const ACHIEVEMENTS: AchievementItem[] = [
     metric: "250+",
     metricLabel: "Problems Solved",
     subtitle: "LeetCode & Competitive Platforms",
-    description: "Consistent problem solving demonstrating deep theoretical and practical mastery across arrays, strings, trees, graphs, two-pointer techniques, and dynamic programming.",
+    description: "Regular practice on arrays, strings, trees, graphs, two pointers and dynamic programming.",
     year: "2024 – Present",
     badge: "Problem Solving"
   }
