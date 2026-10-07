@@ -6,16 +6,12 @@ export const Experience: React.FC = () => {
   return (
     <section id="experience" className="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-neutral-900">
       <div className="max-w-3xl mb-12">
-        <div className="flex items-center gap-2 text-xs font-mono text-indigo-400 mb-2">
-          <span>Career History</span>
-          <span>·</span>
-          <span>Industry Internship</span>
-        </div>
+ 
         <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
           Practical Experience
         </h2>
         <p className="text-sm sm:text-base text-neutral-400 mt-2 text-balance">
-          Applied software engineering training and full-stack project development.
+          Hands-on full-stack internship work.
         </p>
       </div>
 
@@ -23,7 +19,7 @@ export const Experience: React.FC = () => {
         {EXPERIENCE_ITEMS.map((item, index) => (
           <div key={index} className="relative group">
             {/* Timeline node */}
-            <div className="absolute -left-[31px] sm:-left-[39px] top-1.5 w-3.5 h-3.5 rounded-full bg-neutral-900 border-2 border-indigo-500 group-hover:bg-indigo-500 transition-colors" />
+            <div className="absolute -left-7.75 sm:-left-9.75 top-1.5 w-3.5 h-3.5 rounded-full bg-neutral-900 border-2 border-indigo-500 group-hover:bg-indigo-500 transition-colors" />
 
             {/* Experience Card */}
             <div className="p-6 sm:p-7 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all">

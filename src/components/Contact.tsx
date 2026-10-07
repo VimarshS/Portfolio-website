@@ -150,11 +150,6 @@ export const Contact: React.FC = () => {
         {/* Left Column: Direct Info */}
         <div className="lg:col-span-5 space-y-6">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-indigo-400 mb-2">
-              <span>Direct Communication</span>
-              <span>·</span>
-              <span>Open to Roles</span>
-            </div>
             <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
               Let's build something.
             </h2>
@@ -251,9 +246,6 @@ export const Contact: React.FC = () => {
                 <h3 className="text-lg font-bold font-display text-white">
                   Send Me a Message
                 </h3>
-                <p className="text-xs text-neutral-400 mt-0.5">
-                  Direct inquiry form with client-side validation
-                </p>
               </div>
               <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
             </div>

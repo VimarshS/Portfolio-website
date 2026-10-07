@@ -9,16 +9,11 @@ export const AchievementsAndEducation: React.FC = () => {
         {/* Achievements Section */}
         <div className="lg:col-span-7 space-y-6">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-indigo-400 mb-2">
-              <span>Competitive Milestones</span>
-              <span>·</span>
-              <span>Verified Results</span>
-            </div>
             <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
               Key Achievements
             </h2>
             <p className="text-sm text-neutral-400 mt-2">
-              Demonstrated competitive endurance, rapid prototyping, and algorithmic discipline.
+              Hackathon and problem-solving results.
             </p>
           </div>
 
@@ -64,17 +59,10 @@ export const AchievementsAndEducation: React.FC = () => {
         {/* Education Section */}
         <div id="education" className="lg:col-span-5 space-y-6">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-indigo-400 mb-2">
-              <span>Academic Foundation</span>
-              <span>·</span>
-              <span>Computer Science</span>
-            </div>
             <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
               Education
             </h2>
-            <p className="text-sm text-neutral-400 mt-2">
-              Theoretical grounding in core systems, networks, and algorithms.
-            </p>
+ 
           </div>
 
           <div className="p-6 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all space-y-5">

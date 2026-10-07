@@ -46,16 +46,11 @@ export const ProjectsSection: React.FC = () => {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-indigo-400 mb-2">
-            <span>Engineering Showcase</span>
-            <span>·</span>
-            <span>Production & Full-Stack Systems</span>
-          </div>
           <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
             Featured Projects
           </h2>
           <p className="text-sm sm:text-base text-neutral-400 mt-2 max-w-xl text-balance">
-            Real software architectures built with Next.js, React, Node.js, WebSockets, Supabase, and AI APIs.
+            Three full-stack projects, each with a demo you can try.
           </p>
         </div>
 
@@ -108,7 +103,7 @@ export const ProjectsSection: React.FC = () => {
 
           <div className="w-48 h-1 rounded-full bg-neutral-800 overflow-hidden">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-700 ease-out"
+              className="h-full rounded-full bg-linear-to-r from-indigo-500 to-violet-400 transition-all duration-700 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

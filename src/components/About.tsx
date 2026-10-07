@@ -50,11 +50,7 @@ export const About: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         {/* Left Column: Narrative */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="flex items-center gap-2 text-xs font-mono text-indigo-400">
-            <span>Engineering Perspective</span>
-            <span>·</span>
-            <span>Core Philosophy</span>
-          </div>
+ 
 
           <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
             Building with technical depth and product intuition.

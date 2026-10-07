@@ -17,13 +17,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenModal, 
         <div className="flex items-center justify-between text-xs text-neutral-400 mb-3 font-mono">
           <div className="flex items-center gap-2">
             <span className="text-indigo-400 font-semibold">{project.category}</span>
-            <span>·</span>
-            <span>Project {String(index + 1).padStart(2, '0')}</span>
           </div>
           {project.featured && (
             <span className="flex items-center gap-1 text-[11px] text-neutral-400">
               <Sparkles className="w-3 h-3 text-amber-400" />
-              Featured Product
+              Featured
             </span>
           )}
         </div>
@@ -60,7 +58,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenModal, 
       {/* Action Footer */}
       <div className="pt-4 border-t border-neutral-800/60 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          {project.liveUrl ? (
+          {project.liveUrl && (
             <a
               href={project.liveUrl}
               target="_blank"
@@ -70,10 +68,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenModal, 
               <span>Live Demo</span>
               <ExternalLink className="w-3 h-3" />
             </a>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-400 font-mono">
-              Live Demo: Deployment in Progress
-            </span>
           )}
 
           {project.githubUrl && (
