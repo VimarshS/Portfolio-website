@@ -1,5 +1,6 @@
 import React from 'react';
 import { Code2, Cpu, Database, Network, ShieldCheck, Sparkles } from 'lucide-react';
+import { Reveal } from './Reveal';
 
 const PILLARS = [
   {
@@ -42,7 +43,7 @@ export const About: React.FC = () => {
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         {/* Left column: short introduction */}
-        <div className="lg:col-span-5 space-y-6">
+        <Reveal className="lg:col-span-5 space-y-6">
           <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
             About Me
           </h2>
@@ -59,25 +60,24 @@ export const About: React.FC = () => {
               and an AI study-notes tool.
             </p>
           </div>
-        </div>
+        </Reveal>
 
         {/* Right column: what I work with */}
         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {PILLARS.map((pillar) => {
+          {PILLARS.map((pillar, i) => {
             const Icon = pillar.icon;
             return (
-              <div
-                key={pillar.title}
-                className="p-5 rounded-xl bg-neutral-900/30 border border-neutral-800/80 hover:border-neutral-700/80 transition-all hover:bg-neutral-900/50"
-              >
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3">
-                  <Icon className="w-4 h-4" />
+              <Reveal key={pillar.title} delay={i * 80} className="h-full">
+                <div className="h-full p-5 rounded-xl bg-neutral-900/30 border border-neutral-800/80 hover:border-neutral-700/80 transition-all hover:bg-neutral-900/50">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-semibold text-white font-display mb-1.5">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-xs text-neutral-400 leading-relaxed">{pillar.desc}</p>
                 </div>
-                <h3 className="text-sm font-semibold text-white font-display mb-1.5">
-                  {pillar.title}
-                </h3>
-                <p className="text-xs text-neutral-400 leading-relaxed">{pillar.desc}</p>
-              </div>
+              </Reveal>
             );
           })}
         </div>

@@ -4,9 +4,10 @@ import { useProjects } from '../hooks/useProjects';
 import { ProjectCard } from './ProjectCard';
 import { ProjectModal } from './ProjectModal';
 import { ChevronDown } from 'lucide-react';
+import { Reveal } from './Reveal';
 
 // How many cards show at first, and how many more each click adds
-const INITIAL_VISIBLE = 3;
+const INITIAL_VISIBLE = 2;
 const LOAD_STEP = 2;
 
 export const ProjectsSection: React.FC = () => {
@@ -44,7 +45,7 @@ export const ProjectsSection: React.FC = () => {
   return (
     <section id="projects" className="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto border-t border-neutral-900">
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+      <Reveal className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
           <h2 className="text-3xl sm:text-4xl font-bold font-display text-white tracking-tight">
             Featured Projects
@@ -70,7 +71,7 @@ export const ProjectsSection: React.FC = () => {
             </button>
           ))}
         </div>
-      </div>
+      </Reveal>
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -78,17 +79,22 @@ export const ProjectsSection: React.FC = () => {
           const isNew = index >= INITIAL_VISIBLE;
           const delay = isNew ? ((index - INITIAL_VISIBLE) % LOAD_STEP) * 120 : 0;
 
+          const card = (
+            <ProjectCard
+              project={project}
+              onOpenModal={(p) => setActiveModalProject(p)}
+              index={index}
+            />
+          );
+
           return (
             <div
               key={project.id}
               className={`${index === 0 && selectedCategory === 'All' ? 'lg:col-span-2' : ''} ${isNew ? 'project-reveal' : ''}`}
               style={isNew ? { animationDelay: `${delay}ms` } : undefined}
             >
-              <ProjectCard
-                project={project}
-                onOpenModal={(p) => setActiveModalProject(p)}
-                index={index}
-              />
+              {/* Cards added by "View More" have their own effect, so only the first ones use Reveal */}
+              {isNew ? card : <Reveal delay={index * 100}>{card}</Reveal>}
             </div>
           );
         })}

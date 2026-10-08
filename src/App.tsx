@@ -10,6 +10,7 @@ import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { ResumeModal } from './components/ResumeModal';
 import { CustomCursor } from './components/CustomCursor';
+import { Reveal } from './components/Reveal';
 
 export default function App() {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
@@ -43,9 +44,15 @@ export default function App() {
         <About />
         <Skills />
         <ProjectsSection />
-        <Experience />
-        <AchievementsAndEducation />
-        <Contact />
+        <Reveal>
+          <Experience />
+        </Reveal>
+        <Reveal>
+          <AchievementsAndEducation />
+        </Reveal>
+        <Reveal>
+          <Contact />
+        </Reveal>
       </main>
 
       {/* Minimalist Footer */}
