@@ -11,6 +11,7 @@ import { Footer } from './components/Footer';
 import { ResumeModal } from './components/ResumeModal';
 import { CustomCursor } from './components/CustomCursor';
 import { Reveal } from './components/Reveal';
+import { ScrollProgress } from './components/ScrollProgress';
 
 export default function App() {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
@@ -32,6 +33,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050506] text-neutral-200 selection:bg-indigo-500/20 selection:text-indigo-200 relative tech-grid-pattern">
+      {/* Reading progress line at the top */}
+      <ScrollProgress />
       {/* Subtle Custom Cursor for desktop */}
       <CustomCursor />
 

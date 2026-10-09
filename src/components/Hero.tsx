@@ -81,7 +81,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
               <a
                 href="#projects"
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 transition-all shadow-md shadow-indigo-600/20 group"
+                className="btn-shimmer inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 transition-all shadow-md shadow-indigo-600/20 group"
               >
                 <span>Explore Projects</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
