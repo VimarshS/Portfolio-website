@@ -1,44 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { ProfileImage } from './ProfileImage';
-import { 
-  ArrowRight, 
-  FileDown, 
-  Github, 
-  Linkedin, 
-  Mail, 
-  Sparkles, 
-  Terminal, 
-  Code2, 
-  CheckCircle2,
-  ExternalLink
-} from 'lucide-react';
+import { CountUp } from './CountUp';
+import { ArrowRight, FileDown, Github, Linkedin, Mail } from 'lucide-react';
 
 interface HeroProps {
   onOpenResume: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const glowRef = useRef<HTMLDivElement>(null);
 
+  // The light that follows the mouse is moved directly, so the Hero does not
+  // have to render again on every mouse move
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+
+    const apply = () => {
+      frame = 0;
+      if (glowRef.current) {
+        glowRef.current.style.background = `radial-gradient(600px circle at ${x}px ${y}px, rgba(99, 102, 241, 0.08), transparent 80%)`;
+      }
     };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      x = e.clientX;
+      y = e.clientY;
+      if (!frame) frame = window.requestAnimationFrame(apply);
+    };
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
-    <section 
-      id="home" 
+    <section
+      id="home"
       className="relative min-h-[90vh] flex flex-col justify-center pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto overflow-hidden"
     >
+      {/* Two soft glows that drift slowly behind the content */}
+      <div
+        className="hero-glow hero-glow-a -top-24 -left-24 w-[360px] h-[360px] sm:w-[520px] sm:h-[520px] z-0"
+        aria-hidden="true"
+      />
+      <div
+        className="hero-glow hero-glow-b -bottom-32 -right-24 w-[320px] h-[320px] sm:w-[480px] sm:h-[480px] z-0"
+        aria-hidden="true"
+      />
+
       {/* Dynamic Cursor Light / Radial Glow */}
-      <div 
+      <div
+        ref={glowRef}
         className="pointer-events-none fixed -inset-px opacity-30 transition-opacity duration-300 z-0"
         style={{
-          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99, 102, 241, 0.08), transparent 80%)`
+          background:
+            'radial-gradient(600px circle at 0px 0px, rgba(99, 102, 241, 0.08), transparent 80%)',
         }}
         aria-hidden="true"
       />
@@ -48,16 +69,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
         <div className="flex flex-col lg:flex-row items-center lg:items-center gap-8 lg:gap-12">
           {/* Personal Image Container */}
           <div className="flex-shrink-0 flex justify-center">
-            <ProfileImage 
-              src="/profile.jpg"
-              alt="Vimarsh Srivastava"
-            />
+            <ProfileImage src="/profile.jpg" alt="Vimarsh Srivastava" />
           </div>
 
           {/* Hero Introduction Content */}
           <div className="flex-1 space-y-6 text-center lg:text-left">
             {/* Availability Status Badge */}
-            <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-neutral-900/90 border border-neutral-800 text-xs text-neutral-300 shadow-sm backdrop-blur-sm">
+            <div className="hero-in hero-d1 inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-neutral-900/90 border border-neutral-800 text-xs text-neutral-300 shadow-sm backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="font-mono text-[11px] sm:text-xs">
                 Open to SWE Internships & Full-Time Opportunities
@@ -69,16 +87,16 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display text-white tracking-tight leading-[1.1] text-balance">
                 Vimarsh Srivastava
               </h1>
-              <p className="text-base sm:text-xl font-medium text-neutral-300 tracking-tight font-display">
+              <p className="hero-in hero-d2 text-base sm:text-xl font-medium text-neutral-300 tracking-tight font-display">
                 Software Engineer <span className="text-indigo-400 font-sans">/</span> Full Stack Developer <span className="text-indigo-400 font-sans">/</span> AI Enthusiast
               </p>
-              <p className="text-xs sm:text-sm md:text-base text-neutral-400 leading-relaxed max-w-2xl text-balance mx-auto lg:mx-0">
+              <p className="hero-in hero-d3 text-xs sm:text-sm md:text-base text-neutral-400 leading-relaxed max-w-2xl text-balance mx-auto lg:mx-0">
                 {PERSONAL_INFO.bio}
               </p>
             </div>
 
             {/* Primary Call-to-Actions */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
+            <div className="hero-in hero-d4 flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
               <a
                 href="#projects"
                 className="btn-shimmer inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 transition-all shadow-md shadow-indigo-600/20 group"
@@ -131,22 +149,18 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
         </div>
 
         {/* Verified Facts & Stats Banner */}
-        <div className="pt-8 border-t border-neutral-800/80">
+        <div className="hero-in hero-d5 pt-8 border-t border-neutral-800/80">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {PERSONAL_INFO.stats.map((stat, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="p-3.5 sm:p-4 rounded-xl bg-neutral-900/40 border border-neutral-800/70 hover:border-neutral-700/80 transition-colors"
               >
                 <div className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tight tabular-nums">
-                  {stat.value}
+                  <CountUp value={stat.value} />
                 </div>
-                <div className="text-xs font-medium text-neutral-300 mt-0.5">
-                  {stat.label}
-                </div>
-                <div className="text-[11px] text-neutral-400 font-mono mt-0.5">
-                  {stat.context}
-                </div>
+                <div className="text-xs font-medium text-neutral-300 mt-0.5">{stat.label}</div>
+                <div className="text-[11px] text-neutral-400 font-mono mt-0.5">{stat.context}</div>
               </div>
             ))}
           </div>

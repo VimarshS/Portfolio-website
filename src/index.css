@@ -204,3 +204,70 @@ main section.border-t::before {
     display: none;
   }
 }
+
+/* Hero entrance: items fade up one after another (name and photo stay visible) */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-in {
+  animation: hero-in 0.7s ease-out both;
+}
+.hero-d1 { animation-delay: 0.1s; }
+.hero-d2 { animation-delay: 0.22s; }
+.hero-d3 { animation-delay: 0.34s; }
+.hero-d4 { animation-delay: 0.46s; }
+.hero-d5 { animation-delay: 0.6s; }
+
+/* Two soft glows that drift slowly behind the Hero */
+.hero-glow {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hero-glow-a {
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.2), transparent 68%);
+  animation: glow-drift-a 16s ease-in-out infinite alternate;
+}
+
+.hero-glow-b {
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.14), transparent 68%);
+  animation: glow-drift-b 20s ease-in-out infinite alternate;
+}
+
+@keyframes glow-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(40px, 30px, 0) scale(1.12);
+  }
+}
+
+@keyframes glow-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(-50px, -30px, 0) scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-in {
+    animation: none;
+  }
+  .hero-glow-a,
+  .hero-glow-b {
+    animation: none;
+  }
+}
