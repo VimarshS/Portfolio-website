@@ -11,7 +11,7 @@ interface ProjectCardProps {
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenModal, index }) => {
   return (
-    <div className="relative rounded-2xl border border-neutral-800/80 bg-[#08080a]/90 p-5 sm:p-7 transition-all duration-300 hover:border-neutral-700/80 hover:shadow-xl hover:shadow-indigo-500/5 flex flex-col justify-between">
+    <div className="spotlight spotlight-ring relative rounded-2xl border border-neutral-800/80 bg-[#08080a]/90 p-5 sm:p-7 transition-all duration-300 hover:border-neutral-700/80 hover:shadow-xl hover:shadow-indigo-500/5 flex flex-col justify-between">
       <div>
         {/* Unboxed Metadata (Zero-Pill discipline) */}
         <div className="flex items-center justify-between text-xs text-neutral-400 mb-3 font-mono">

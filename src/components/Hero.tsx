@@ -154,7 +154,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenResume }) => {
             {PERSONAL_INFO.stats.map((stat, i) => (
               <div
                 key={i}
-                className="p-3.5 sm:p-4 rounded-xl bg-neutral-900/40 border border-neutral-800/70 hover:border-neutral-700/80 transition-colors"
+                className="spotlight p-3.5 sm:p-4 rounded-xl bg-neutral-900/40 border border-neutral-800/70 hover:border-neutral-700/80 transition-colors"
               >
                 <div className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tight tabular-nums">
                   <CountUp value={stat.value} />

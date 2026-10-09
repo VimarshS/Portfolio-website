@@ -271,3 +271,61 @@ main section.border-t::before {
     animation: none;
   }
 }
+
+/* Card spotlight: a soft light and a glowing border that follow the mouse.
+   --mx and --my are set by useSpotlight. */
+.spotlight {
+  position: relative;
+}
+
+.spotlight::before,
+.spotlight::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* The light across the card */
+.spotlight::before {
+  background: radial-gradient(
+    320px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(129, 140, 248, 0.12),
+    transparent 65%
+  );
+}
+
+/* The glowing border (a 1px ring) */
+.spotlight::after {
+  padding: 1px;
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(129, 140, 248, 0.6),
+    transparent 65%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.spotlight:hover::before,
+.spotlight:hover::after {
+  opacity: 1;
+}
+
+/* Border only (used on cards that contain a demo) */
+.spotlight-ring::before {
+  display: none;
+}
+
+/* No mouse, no spotlight */
+@media (hover: none) {
+  .spotlight::before,
+  .spotlight::after {
+    display: none;
+  }
+}

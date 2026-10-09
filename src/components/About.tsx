@@ -68,7 +68,7 @@ export const About: React.FC = () => {
             const Icon = pillar.icon;
             return (
               <Reveal key={pillar.title} delay={i * 80} className="h-full">
-                <div className="h-full p-5 rounded-xl bg-neutral-900/30 border border-neutral-800/80 hover:border-neutral-700/80 transition-all hover:bg-neutral-900/50">
+                <div className="spotlight h-full p-5 rounded-xl bg-neutral-900/30 border border-neutral-800/80 hover:border-neutral-700/80 transition-all hover:bg-neutral-900/50">
                   <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3">
                     <Icon className="w-4 h-4" />
                   </div>

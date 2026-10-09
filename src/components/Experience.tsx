@@ -22,7 +22,7 @@ export const Experience: React.FC = () => {
             <div className="absolute -left-7.75 sm:-left-9.75 top-1.5 w-3.5 h-3.5 rounded-full bg-neutral-900 border-2 border-indigo-500 group-hover:bg-indigo-500 transition-colors" />
 
             {/* Experience Card */}
-            <div className="p-6 sm:p-7 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all">
+            <div className="spotlight p-6 sm:p-7 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold font-display text-white">

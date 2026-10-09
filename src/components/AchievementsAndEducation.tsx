@@ -21,7 +21,7 @@ export const AchievementsAndEducation: React.FC = () => {
             {ACHIEVEMENTS.map((ach) => (
               <div
                 key={ach.id}
-                className="p-6 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all space-y-3"
+                className="spotlight p-6 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all space-y-3"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
@@ -65,7 +65,7 @@ export const AchievementsAndEducation: React.FC = () => {
  
           </div>
 
-          <div className="p-6 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all space-y-5">
+          <div className="spotlight p-6 rounded-2xl bg-neutral-900/40 border border-neutral-800/80 hover:border-neutral-700/80 transition-all space-y-5">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 mt-0.5">
                 <GraduationCap className="w-5 h-5" />

@@ -12,9 +12,11 @@ import { ResumeModal } from './components/ResumeModal';
 import { CustomCursor } from './components/CustomCursor';
 import { Reveal } from './components/Reveal';
 import { ScrollProgress } from './components/ScrollProgress';
+import { useSpotlight } from './hooks/useSpotlight';
 
 export default function App() {
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+    useSpotlight();
     // Shortcut to the admin page: Alt + Shift + A
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
