@@ -34,6 +34,9 @@ app.use('/api/admin', adminRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Portfolio server is running' });
 });
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok', service: 'portfolio-api' });
+});
 
 async function start() {
   try {
